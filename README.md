@@ -1,144 +1,57 @@
-<<<<<<< HEAD
-# jrrg
-=======
-# NJU金融软工项目
+# NJU《金融软工》课程项目框架前端部分
 
-该项目是南京大学《金融软工》课程的项目，包含前后端完整代码。
+该项目是南京大学《金融软工》课程的项目框架的前端项目，后端见：[jrrg_framework_backend: NJU《金融软工》课程项目模板后端代码](https://gitee.com/coding-wang/jrrg_framework_backend)。
 
-## 项目结构
+## 项目简介
 
-项目分为前端和后端两个部分：
+本项目模板采用`React18`+`Ant-Design5`作为核心实现，通过`react-router-dom`来实现路由功能，使用`axios`进行网络请求。
 
-- `jrrg_framework_backend`：后端项目，基于Python Flask框架开发
-- `jrrg_framework_frontend`：前端项目，基于React和Ant Design开发
+## 环境准备
 
-## 功能特性
+为了运行本项目，你需要进行如下的环境准备工作：
 
-- 用户注册与登录
-- JWT认证机制
-- 用户信息管理
-- 响应式界面设计
+1. 安装`Node.js`，推荐安装LTS版本，教程见：[2024最新版Node.js下载安装及环境配置教程【保姆级】_nodejs下载-CSDN博客](https://blog.csdn.net/WHF__/article/details/129362462)
 
-## 运行项目前的必要准备
+2. 安装依赖，由于项目模板已经在`/package.json`中列出了本项目所依赖的扩展库，所以你只需要通过如下命令进行依赖安装：
 
-### 数据库配置
-
-1. 确保已安装MySQL数据库
-
-2. 创建数据库和用户表
-   ```sql
-   create database jrrg_framework_db;
-   use jrrg_framework_db;
-   create table user (
-       id       int auto_increment primary key,
-       username varchar(255) not null,
-       password varchar(60)  not null,
-       nickname varchar(255) null,
-       email    varchar(255) null,
-       phone    varchar(11)  null,
-       constraint user_pk unique (username)
-   );
-   ```
-
-3. 修改`jrrg_framework_backend/app.env`文件中的数据库连接信息
-   ```
-   SQLALCHEMY_DATABASE_URI=mysql+mysqlconnector://root:您的密码@localhost:3306/jrrg_framework_db
-   JWT_SECRET_KEY=your-secret-key
-   ```
-
-### 后端环境准备
-
-1. 确保使用Python 3.10
-   ```
-   python --version
-   ```
-
-2. 创建并激活虚拟环境（推荐）
-   ```
-   # 使用conda
-   conda create -n jrrg python==3.10
-   conda activate jrrg
-   
-   # 或使用venv
-   python -m venv venv
-   # Windows
-   venv\Scripts\activate
-   # Linux/Mac
-   source venv/bin/activate
-   ```
-
-3. 安装依赖包
-   ```
-   pip install -r requirements.txt
-   ```
-
-### 前端环境准备
-
-1. 确保已安装Node.js（推荐LTS版本）
-   ```
-   node --version
-   npm --version
-   ```
-
-2. 安装前端依赖
-   ```
-   cd jrrg_framework_frontend
+   ```shell
    npm install
    ```
 
-3. 如果后端服务不是默认的`http://localhost:8080`，需要修改`jrrg_framework_frontend/src/setupProxy.js`文件中的后端地址
+## 运行与部署
 
-## 运行项目
+### 服务配置
 
-### 启动后端服务
+由于本项目采用前后端分离的方式进行开发，所以本前端部分需要依赖于后端提供的服务地址，模板默认设置的后端服务地址为`http://localhost:8080`，如果你对后端的服务配置进行了修改，那么应当修改`/src/setupProxy.js`中的如下内容：
 
+```javascript
+// NOTE 此文件需要创建在src/setupProxy.js文件中，用于解决跨域问题，需要先通过npm install http-proxy-middleware --save安装依赖（此项目已经安装完毕）
+
+const { createProxyMiddleware } = require('http-proxy-middleware')    //解构出createProxyMiddleware
+
+module.exports = function (app) {
+    app.use(
+        '/api', // 这段逻辑的意思是说拦截所有以“/api”开头的http请求，并且转发到设置的target地址对应的主机中，并且将“/api”替换为空（即删除），所以设置完这段逻辑之后所有的请求都必须以/api开头
+        createProxyMiddleware({        //使用createProxyMiddleware
+            target: /*你自定义的后端服务地址*/
+            changeOrigin: true,
+            pathRewrite: { '/api': '' }
+        })
+    )
+}
 ```
-cd jrrg_framework_backend
-python run.py
+
+### 运行
+
+进入到项目根目录，并通过如下命令运行前端项目：
+
+```shell
+npm run start
 ```
-后端将在`http://localhost:8080`启动
 
-### 启动前端服务
 
-```
-cd jrrg_framework_frontend
-npm start
-```
-前端将在`http://localhost:3000`启动
 
-浏览器会自动打开前端页面。如果没有自动打开，请手动访问`http://localhost:3000`
+## 提醒
 
-## 项目使用
+本项目在运行时可能会报错，这极有可能是因为版本不兼容的问题，可以参照网络上相关的教程进行配置。
 
-1. 首次使用需要在注册页面创建账号
-2. 使用已注册的账号登录系统
-3. 登录后可以查看个人资料页面
-
-## 注意事项
-
-1. **app.env配置文件**：
-   - 该文件包含敏感信息，生产环境不应上传到代码仓库
-   - 必须正确配置数据库连接信息
-
-2. **node_modules和Python虚拟环境**：
-   - 这些目录不包含在代码仓库中
-   - 需要按照上述步骤自行创建和安装依赖
-
-3. **跨域问题**：
-   - 前端通过setupProxy.js解决跨域问题
-   - 如修改后端端口，必须同步修改前端代理配置
-
-4. **可能遇到的问题**：
-   - 如果MySQL连接失败，请检查用户名、密码、主机和端口配置
-   - 如果依赖安装失败，可能需要配置代理或更换源
-
-## API接口
-
-后端提供以下主要API接口：
-
-- `/user/login`: 用户登录
-- `/user/logout`: 用户登出
-- `/user/register`: 用户注册
-- `/user/info`: 获取当前用户信息
-- `/user/info/<user_id>`: 获取指定用户信息 
->>>>>>> c687e20 (first commit)
